@@ -71,6 +71,6 @@ class RelatedWork extends Subitem
      */
     public function getWorkIdentifier()
     {
-        return $this->workIdentifier;
+        return $this->value;
     }
 };
