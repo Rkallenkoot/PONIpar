@@ -16,98 +16,126 @@ use PONIpar\ProductSubitem\Subitem;
 /**
  * A <Contributor> subitem.
  */
-class Contributor extends Subitem {
+class Contributor extends Subitem
+{
 
-	// Mapping of constants to types.
-	const ROLE_AUTHOR  		= 'A01';
-	const ROLE_NARRATOR     = 'E03';
-	const ROLE_READBY       = 'E07';
-	const ROLE_PERFORMER    = 'E99';
+    // Mapping of constants to types.
+    const ROLE_AUTHOR       = 'A01';
+    const ROLE_NARRATOR     = 'E03';
+    const ROLE_READBY       = 'E07';
+    const ROLE_PERFORMER    = 'E99';
 
-	/**
-	 * The type of this product identifier.
-	 */
-	protected $role = null;
-	protected $name = null;
+    /**
+     * The ContributorRole of this Contributor
+     */
+    protected $role = null;
 
-	/**
-	 * The identifier’s value.
-	 */
-	protected $value = null;
+    /**
+     * The contributor value.
+     */
+    protected $value = null;
 
-	/**
-	 * Create a new Contributor.
-	 *
-	 * @param mixed $in The <Contributor> DOMDocument or DOMElement.
-	 */
-	public function __construct($in) {
+    /**
+     * Create a new Contributor.
+     *
+     * @param mixed $in The <Contributor> DOMDocument or DOMElement.
+     */
+    public function __construct($in)
+    {
+        parent::__construct($in);
 
-		parent::__construct($in);
+        // Retrieve and check the type.
+        $this->role = $this->_getSingleChildElementText('ContributorRole');
 
-		// Retrieve and check the type.
-		$this->role = $this->_getSingleChildElementText('ContributorRole');
+        // Get the value.
+        $this->value = array();
 
-		// Get the value.
-		$this->value = array();
+        $this->value['ContributorRole'] = $this->role;
 
-		$this->value['ContributorRole'] = $this->role;
+        try {
+            $this->value['PersonName'] = $this->_getSingleChildElementText('PersonName');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['PersonNameInverted'] = $this->_getSingleChildElementText('PersonNameInverted');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['SequenceNumber'] = $this->_getSingleChildElementText('SequenceNumber');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['NamesBeforeKey'] = $this->_getSingleChildElementText('NamesBeforeKey');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['KeyNames'] = $this->_getSingleChildElementText('KeyNames');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['CorporateName'] = $this->_getSingleChildElementText('CorporateName');
+        } catch (\Exception $e) {
+        }
+        try {
+            $this->value['Bio'] = $this->_getSingleChildElementText('BiographicalNote');
+        } catch (\Exception $e) {
+        }
 
-		try {$this->value['PersonName'] = $this->_getSingleChildElementText('PersonName');} catch(\Exception $e) { }
-		try {$this->value['PersonNameInverted'] = $this->_getSingleChildElementText('PersonNameInverted');} catch(\Exception $e) { }
-		try {$this->value['SequenceNumber'] = $this->_getSingleChildElementText('SequenceNumber');} catch(\Exception $e) { }
-		try {$this->value['NamesBeforeKey'] = $this->_getSingleChildElementText('NamesBeforeKey');} catch(\Exception $e) { }
-		try {$this->value['KeyNames'] = $this->_getSingleChildElementText('KeyNames');} catch(\Exception $e) { }
-		try {$this->value['Bio'] = $this->_getSingleChildElementText('BiographicalNote');} catch(\Exception $e) { }
+        if (isset($this->value['Bio'])) {
+            $this->value['Bio'] = $this->clean($this->value['Bio']);
+        }
 
-		if(isset($this->value['Bio']))
-			$this->value['Bio'] = $this->clean($this->value['Bio']);
+        // Save memory.
+        $this->_forgetSource();
+    }
 
-		// Save memory.
-		$this->_forgetSource();
-	}
 
-	/*
-		Get Name
-	*/
-	public function getName(){
+    /**
+     * Get the name of the Contributor
+     *
+     * @return ?string|null
+     */
+    public function getName()
+    {
+        if (isset($this->value['PersonName'])) {
+            return $this->value['PersonName'];
+        }
 
-		// already found
-		if( $this->name )
-			return $this->name();
+        if (isset($this->value['PersonNameInverted'])) {
+            return preg_replace("/^(.+), (.+)$/", "$2 $1", $this->value['PersonNameInverted']);
+        }
 
-		if( $this->getValue()['PersonName'] )
-			return $this->name = $this->getValue()['PersonName'];
+        if (isset($this->value['CorporateName'])) {
+            return $this->value['CorporateName'];
+        }
 
-		if( $this->getValue()['PersonNameInverted'] ){
-			return $this->name = preg_replace("/^(.+), (.+)$/", "$2 $1", $this->getValue()['PersonNameInverted']);
-		}
+        return null;
+    }
 
-		return $this->name;
-	}
+    /**
+     * Retrieve the type of this identifier.
+     *
+     * @return string The contents of <ProductIDType>.
+     */
+    public function getRole()
+    {
+        return $this->role;
+    }
 
-	/**
-	 * Retrieve the type of this identifier.
-	 *
-	 * @return string The contents of <ProductIDType>.
-	 */
-	public function getRole() {
-		return $this->role;
-	}
+    /**
+     * Retrieve the actual value of this identifier.
+     *
+     * @return string The contents of <Contributor>.
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
 
-	/**
-	 * Retrieve the actual value of this identifier.
-	 *
-	 * @return string The contents of <IDValue>.
-	 */
-	public function getValue() {
-		return $this->value;
-	}
-
-	private function clean($str){
-		$str = str_replace("<![CDATA[","",$str);
-		$str = preg_replace("/\]\]>*$/","",$str);
-		return $str;
-	}
-
+    private function clean($str)
+    {
+        $str = str_replace("<![CDATA[", "", $str);
+        $str = preg_replace("/\]\]>*$/", "", $str);
+        return $str;
+    }
 }
-
