@@ -204,12 +204,12 @@ class Product {
 	}
 
 	public function getPublishingStatusString(){
-		$status = $this->PublishingStatus();
+		$status = $this->getPublishingStatus();
 		return isset(self::$productStatus[$status]) ? self::$productStatus[$status] : 'Unknown';
 	}
 
 	public function isActive(){
-		return in_array($this->publishingStatus(),['04','02']); // 'Active' and `Forthcoming` (list 64)
+		return in_array($this->getPublishingStatus(),['04','02']); // 'Active' and `Forthcoming` (list 64)
 	}
 
 	/**
