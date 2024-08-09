@@ -16,14 +16,20 @@ namespace PONIpar\ProductSubitem;
  */
 class OtherText extends Subitem
 {
-    // TODO - add more type constants
-
     // List 33
     public const TYPE_MAIN_DESCRIPTION = "01";
     public const TYPE_SHORT_DESCRIPTION = "02";
     public const TYPE_LONG_DESCRIPTION = "03";
     public const TYPE_REVIEW_QUOTE = "08";
     public const TYPE_BIOGRAPHICAL_NOTE = "13";
+
+    // List 153 (onix v3)
+    public const TYPE_SHORT_DESCRIPTION_V3 = "02";
+    public const TYPE_DESCRIPTION_V3 = "03";
+    public const TYPE_TABLE_OF_CONTENTS_V3 = "04";
+    public const TYPE_REVIEW_QUOTE_V3 = "06";
+    public const TYPE_BIOGRAPHICAL_NOTE_V3 = "12";
+    public const TYPE_DESCRIPTION_FOR_COLLECTION_V3 = "17";
 
     // List 34
     public const FORMAT_HTML = '02';

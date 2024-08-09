@@ -20,6 +20,7 @@ class Subject extends Subitem
     // list 27
     public const SCHEME_BISAC_SUBJECT_HEADING = "10";
     public const SCHEME_KEYWORDS = "20";
+    public const SCHEMA_THEMA = "93";
 
     /**
      * The scheme of this subject

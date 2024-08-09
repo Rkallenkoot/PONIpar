@@ -30,8 +30,10 @@ class Title extends Subitem
      * The title's values
      */
     protected $value = array(
-      'title' => null,
-      'subtitle' => null
+        'title' => null,
+        'subtitle' => null,
+        'titlePrefix' => null,
+        'titleWithoutPrefix' => null,
     );
 
     /**
@@ -60,6 +62,16 @@ class Title extends Subitem
         } catch (\Exception $e) {
         }
 
+        try {
+            $this->value['titlePrefix'] = $this->_getSingleChildElementText('TitlePrefix');
+        } catch (\Exception $e) {
+        }
+
+        try {
+            $this->value['titleWithoutPrefix'] = $this->_getSingleChildElementText('TitleWithoutPrefix');
+        } catch (\Exception $e) {
+        }
+
         // try 3.0 structure
         if (!$this->value['title']) {
             try {
@@ -68,6 +80,15 @@ class Title extends Subitem
             }
             try {
                 $this->value['subtitle'] = $this->_getSingleChildElementText('TitleElement/Subtitle');
+            } catch (\Exception $e) {
+            }
+            try {
+                $this->value['titlePrefix'] = $this->_getSingleChildElementText('TitleElement/TitlePrefix');
+            } catch (\Exception $e) {
+            }
+
+            try {
+                $this->value['titleWithoutPrefix'] = $this->_getSingleChildElementText('TitleElement/TitleWithoutPrefix');
             } catch (\Exception $e) {
             }
         }
@@ -94,5 +115,55 @@ class Title extends Subitem
     public function getValue()
     {
         return $this->value;
+    }
+
+    /**
+     * Retrieve the subtitle
+     *
+     * @return string The contents of <Subtitle>.
+     */
+    public function getSubtitle()
+    {
+        return $this->value['subtitle'];
+    }
+
+    /**
+     * Retrieve the full title
+     * 
+     * Full title is value of <TitleText> or values of <TitlePrefix> and <TitleWithoutPrefix> concatenated
+     *
+     * @return string|null The contents of <Subtitle>.
+     */
+    public function getFullTitle()
+    {
+        if (!empty($this->value['title'])) {
+            return $this->value['title'];
+        }
+
+        if (!empty($this->value['titlePrefix']) && !empty($this->value['titleWithoutPrefix'])) {
+            return $this->value['titlePrefix'] . ' ' . $this->value['titleWithoutPrefix'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieve the title prefix
+     * 
+     * @return string|null The contents of <TitlePrefix>.
+     */
+    public function getTitlePrefix()
+    {
+        return $this->value['titlePrefix'];
+    }
+
+    /**
+     * Retrieve the title without prefix
+     * 
+     * @return string|null The contents of <TitleWithoutPrefix>.
+     */
+    public function getTitleWithoutPrefix()
+    {
+        return $this->value['titleWithoutPrefix'];
     }
 };

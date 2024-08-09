@@ -124,6 +124,16 @@ class Contributor extends Subitem
     }
 
     /**
+     * Retrieve the SequenceNumber of this contributor.
+     * 
+     * @return string|null The contents of <SequenceNumber>.
+     */
+    public function getSequenceNumber()
+    {
+        return $this->value['SequenceNumber'] ?? null;
+    }
+
+    /**
      * Retrieve the actual value of this identifier.
      *
      * @return string The contents of <Contributor>.

@@ -2,6 +2,7 @@
 
 namespace PONIpar;
 
+use PONIpar\ProductSubitem\Title;
 use PONIpar\ProductSubitem\Subject;
 use PONIpar\Exceptions\XMLException;
 use PONIpar\ProductSubitem\OtherText;
@@ -27,28 +28,28 @@ class Product
      * min=0 and max=0 (meaning "unlimited").
      */
     protected static $allowedSubitems = array(
-    'ProductIdentifier' => array('min' => 1),
-  );
+        'ProductIdentifier' => array('min' => 1),
+    );
 
     protected static $productStatus = array(
-    "00" => "Unspecified",
-    "01" => "Cancelled",
-    "02" => "Forthcoming",
-    "03" => "Postponed indefinitely",
-    "04" => "Active",
-    "05" => "No longer our product",
-    "06" => "Out of stock indefinitely",
-    "07" => "Out of print",
-    "08" => "Inactive",
-    "09" => "Unknown",
-    "10" => "Remaindered",
-    "11" => "Withdrawn from sale",
-    "12" => "Not available in this market",
-    "13" => "Active, but not sold separately",
-    "14" => "Active, with market restrictions",
-    "15" => "Recalled",
-    "16" => "Temporarily withdrawn from sale"
-  );
+        "00" => "Unspecified",
+        "01" => "Cancelled",
+        "02" => "Forthcoming",
+        "03" => "Postponed indefinitely",
+        "04" => "Active",
+        "05" => "No longer our product",
+        "06" => "Out of stock indefinitely",
+        "07" => "Out of print",
+        "08" => "Inactive",
+        "09" => "Unknown",
+        "10" => "Remaindered",
+        "11" => "Withdrawn from sale",
+        "12" => "Not available in this market",
+        "13" => "Active, but not sold separately",
+        "14" => "Active, with market restrictions",
+        "15" => "Recalled",
+        "16" => "Temporarily withdrawn from sale"
+    );
 
     /**
      * The version of ONIX we are parsing
@@ -117,7 +118,7 @@ class Product
      * @return array  A (possibly empty) array of Subitem subclass objects or
      *                DOMElement objects.
      */
-    public function get($name, $classname=null)
+    public function get($name, $classname = null)
     {
         $classname = $classname ? $classname : $name;
 
@@ -146,8 +147,8 @@ class Product
     }
 
     /**
-    * Gets version of ONIX being parsed
-    */
+     * Gets version of ONIX being parsed
+     */
     public function getVersion()
     {
         return $this->version;
@@ -193,12 +194,12 @@ class Product
 
 
     /**
-    * Get Edition
-    *
-    * See list 64 for status codes
-    *
-    * @return string
-    */
+     * Get Publishing status
+     *
+     * See list 64 for status codes
+     *
+     * @return string
+     */
     public function getPublishingStatus()
     {
         if ($this->version >= '3.0') {
@@ -210,22 +211,22 @@ class Product
 
     public function getPublishingStatusString()
     {
-        $status = $this->PublishingStatus();
+        $status = $this->getPublishingStatus();
         return isset(self::$productStatus[$status]) ? self::$productStatus[$status] : 'Unknown';
     }
 
     public function isActive()
     {
-        return in_array($this->publishingStatus(), ['04','02']); // 'Active' and `Forthcoming` (list 64)
+        return in_array($this->getPublishingStatus(), ['04', '02']); // 'Active' and `Forthcoming` (list 64)
     }
 
     /**
-    * Get Product Form
-    *
-    * See list 150 for form codes
-    *
-    * @return string
-    */
+     * Get Product Form
+     *
+     * See list 150 for form codes
+     *
+     * @return string
+     */
     public function getProductForm()
     {
         if ($this->version >= '3.0') {
@@ -284,10 +285,10 @@ class Product
     }
 
     /**
-    * Get Titles
-    *
-    * @return array of Title objects
-    */
+     * Get Titles
+     *
+     * @return array of Title objects
+     */
     public function getTitles()
     {
         if ($this->version >= '3.0') {
@@ -295,6 +296,38 @@ class Product
         } else {
             return $this->get('Title');
         }
+    }
+
+    /**
+     * Get the full title of the product (distinctive title)
+     *
+     * @return string Returns the full title of the product
+     */
+    public function getTitle()
+    {
+        foreach ($this->getTitles() as $title) {
+            if ($title->getType() == Title::TYPE_DISTINCTIVE_TITLE) {
+                return $title->getFullTitle();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the subtitle of the product (distinctive title)
+     *
+     * @return string|null Returns the subtitle of the product
+     */
+    public function getSubtitle()
+    {
+        foreach ($this->getTitles() as $title) {
+            if ($title->getType() == Title::TYPE_DISTINCTIVE_TITLE) {
+                return $title->getSubtitle();
+            }
+        }
+
+        return null;
     }
 
     public function getPublisher()
@@ -306,10 +339,10 @@ class Product
     }
 
     /**
-    * Get Contributors
-    *
-    * @return array of Contributor objects
-    */
+     * Get Contributors
+     *
+     * @return array of Contributor objects
+     */
     public function getContributors()
     {
         if ($this->version >= '3.0') {
@@ -320,10 +353,10 @@ class Product
     }
 
     /**
-    * Get Supply Details
-    *
-    * @return array of SupplyDetail objects
-    */
+     * Get Supply Details
+     *
+     * @return array of SupplyDetail objects
+     */
     public function getSupplyDetails()
     {
         if ($this->version >= '3.0') {
@@ -334,10 +367,10 @@ class Product
     }
 
     /**
-    * Get Sales Rights
-    *
-    * @return array of SalesRights objects
-    */
+     * Get Sales Rights
+     *
+     * @return array of SalesRights objects
+     */
     public function getSalesRights()
     {
         if ($this->version >= '3.0') {
@@ -348,10 +381,10 @@ class Product
     }
 
     /**
-    * Get For Sale Rights
-    *
-    * @return string Region of list of countries this product is for sale in
-    */
+     * Get For Sale Rights
+     *
+     * @return string Region of list of countries this product is for sale in
+     */
     public function getForSaleRights()
     {
         $sales_rights = $this->getSalesRights();
@@ -362,7 +395,7 @@ class Product
         } else {
             foreach ($sales_rights as $sr) {
                 if ($sr->isForSale()) {
-                    $rights .= ' '.$sr->getValue();
+                    $rights .= ' ' . $sr->getValue();
                 }
             }
 
@@ -376,10 +409,10 @@ class Product
     }
 
     /**
-    * Get Texts
-    *
-    * @return array of OtherText objects
-    */
+     * Get Texts
+     *
+     * @return array of OtherText objects
+     */
     public function getTexts()
     {
         if ($this->version >= '3.0') {
@@ -390,14 +423,14 @@ class Product
     }
 
     /**
-    * Get Main Description
-    *
-    * If no main description is found, it will return the first in the list,
-    * unless `$strict` is set to `true`
-    *
-    * @return string
-    */
-    public function getMainDescription($strict=false)
+     * Get Main Description
+     *
+     * If no main description is found, it will return the first in the list,
+     * unless `$strict` is set to `true`
+     *
+     * @return string
+     */
+    public function getMainDescription($strict = false)
     {
         $texts = $this->getTexts();
         $description = '';
@@ -414,10 +447,31 @@ class Product
     }
 
     /**
-    * Get Review Quotes
-    *
-    * @return array
-    */
+     * Get Description by Type
+     * 
+     * See list 153
+     *
+     * @param string $type The type of description to get
+     * @return string|null The description
+     */
+    public function getDescription(string $type)
+    {
+        $texts = $this->getTexts();
+
+        foreach ($texts as $text) {
+            if ($text->getType() == $type) {
+                return $text->getValue();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get Review Quotes
+     *
+     * @return array of review quotes
+     */
     public function getReviewQuotes()
     {
         $texts = $this->getTexts();
@@ -426,9 +480,9 @@ class Product
         foreach ($texts as $text) {
             if ($text->getType() == OtherText::TYPE_REVIEW_QUOTE) {
                 $quotes[] = [
-          'text' => $text->getValue(),
-          'author' => $text->getAuthor()
-        ];
+                    'text' => $text->getValue(),
+                    'author' => $text->getAuthor()
+                ];
             }
         }
 
@@ -436,18 +490,24 @@ class Product
     }
 
     /**
-    * Get Bio Notes
-    *
-    * @return array
-    */
+     * Get Bio Notes
+     *
+     * @return array of biographical notes
+     */
     public function getBiograhpicalNotes()
     {
         $texts = $this->getTexts();
         $notes = [];
 
         foreach ($texts as $text) {
-            if ($text->getType() == OtherText::TYPE_BIOGRAPHICAL_NOTE) {
-                $notes[] = $text->getValue();
+            if ($this->version >= '3.0') {
+                if ($text->getType() == OtherText::TYPE_BIOGRAPHICAL_NOTE_V3) {
+                    $notes[] = $text->getValue();
+                }
+            } else {
+                if ($text->getType() == OtherText::TYPE_BIOGRAPHICAL_NOTE) {
+                    $notes[] = $text->getValue();
+                }
             }
         }
 
@@ -472,24 +532,38 @@ class Product
 
 
     /**
-    * Get Edition
-    *
-    * @return string
-    */
+     * Get Edition Number
+     *
+     * @return string|null Edition number
+     */
     public function getEdition()
     {
         if ($this->version >= '3.0') {
-            return $this->get('DescriptiveDetail/EditionType')[0]->nodeValue;
+            return $this->get('DescriptiveDetail/EditionNumber')[0]?->nodeValue ?? null;
         } else {
-            return $this->get('EditionTypeCode')[0]->nodeValue;
+            return $this->get('EditionNumber')[0]?->nodeValue ?? null;
         }
     }
 
     /**
-    * Get Publish Date
-    *
-    * @return string
-    */
+     * Get Edition Type
+     * 
+     * @return string|null Edition type
+     */
+    public function getEditionType()
+    {
+        if ($this->version >= '3.0') {
+            return $this->get('DescriptiveDetail/EditionType')[0]?->nodeValue ?? null;
+        } else {
+            return $this->get('EditionTypeCode')[0]?->nodeValue ?? null;
+        }
+    }
+
+    /**
+     * Get Publish Date
+     *
+     * @return string
+     */
     public function getPublishDate()
     {
         // @TODO: 3.0 has more data such as `PublishingDateRole` that may need fleshed out
@@ -501,10 +575,10 @@ class Product
     }
 
     /**
-    * Get Publish Date
-    *
-    * @return string
-    */
+     * Get Publish Date
+     *
+     * @return string
+     */
     public function getFirstImprintName()
     {
         // @TODO: many imprints can be set, we should support grabbing them all
@@ -516,10 +590,10 @@ class Product
     }
 
     /**
-    * Get First Publisher Name
-    *
-    * @return string
-    */
+     * Get First Publisher Name
+     *
+     * @return string
+     */
     public function getFirstPublisherName()
     {
         // @TODO: many publishers can be set, we should support grabbing them all
@@ -531,10 +605,10 @@ class Product
     }
 
     /**
-    * Get Copyright Year
-    *
-    * @return string
-    */
+     * Get Copyright Year
+     *
+     * @return string
+     */
     public function getCopyrightYear()
     {
         // @TODO: 3.0 has a more robust out `CopyrightStatement` that should probably be used
@@ -551,32 +625,43 @@ class Product
 
 
     /**
-    * Get Copyright Statement
-    *
-    * @return string
-    */
+     * Get Copyright Statement
+     *
+     * @return string
+     */
     public function getCopyrightStatement()
     {
         $prefix = $this->version >= '3.0' ? 'PublishingDetail/CopyrightStatement' : 'CopyrightStatement';
 
-        $name = $this->get($prefix.'/CopyrightOwner/CorporateName')[0]->nodeValue;
+        $name = $this->get($prefix . '/CopyrightOwner/CorporateName')[0]->nodeValue;
 
         if (!$name) {
-            $name = $this->get($prefix.'/CopyrightOwner/PersonName')[0]->nodeValue;
+            $name = $this->get($prefix . '/CopyrightOwner/PersonName')[0]->nodeValue;
         }
 
         $year = $this->getCopyrightYear();
 
-        return $year.($name ? ' '.$name : '');
+        return $year . ($name ? ' ' . $name : '');
     }
 
-
+    /**
+     * Get Audiences
+     * 
+     * @return array of Audiences
+     */
     public function getAudience()
     {
         if ($this->version >= '3.0') {
             return $this->get('DescriptiveDetail/Audience', 'Audience');
         }
-        return $this->get('AudienceCode');
+
+        $audience = $this->get('Audience', 'Audience');
+
+        if ($audience) {
+            return $audience;
+        }
+
+        return $this->get('AudienceCode', 'Audience');
     }
 
     /**
@@ -626,6 +711,15 @@ class Product
         return $others;
     }
 
+    public function getSubjects()
+    {
+        if ($this->version >= '3.0') {
+            return $this->get('DescriptiveDetail/Subject', 'Subject');
+        } else {
+            return $this->get('Subject', 'Subject');
+        }
+    }
+
     /**
      * Get Keywords
      *
@@ -645,5 +739,29 @@ class Product
             }
         }
         return "";
+    }
+
+    /**
+     * Get Collections
+     * 
+     * @return array Returns array of Collection objects
+     */
+    public function getCollections(): array
+    {
+        if ($this->version >= '3.0') {
+            return $this->get('DescriptiveDetail/Collection', 'Collection');
+        }
+
+        // Get Series and Sets for v2
+        $collections = [];
+
+        $series = $this->get('Series', 'Collection');
+        $sets = $this->get('Set', 'Collection');
+
+        // Merge the series and sets into a single array
+        $collections = array_merge($collections, is_array($series) ? $series : [$series]);
+        $collections = array_merge($collections, is_array($sets) ? $sets : [$sets]);
+
+        return array_filter($collections);
     }
 }

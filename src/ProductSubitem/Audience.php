@@ -68,9 +68,23 @@ class Audience extends Subitem
         parent::__construct($in);
 
         // Retrieve and check the type.
-        $this->audienceCodeType = $this->_getSingleChildElementText('AudienceCodeType');
+        try {
+            $this->audienceCodeType = $this->_getSingleChildElementText('AudienceCodeType');
+        } catch (\Exception $e) {
+        }
 
-        $this->audienceCodeValue = $this->_getSingleChildElementText('AudienceCodeValue');
+        try {
+            $this->audienceCodeValue = $this->_getSingleChildElementText('AudienceCodeValue');
+        } catch (\Exception $e) {
+        }
+
+        if (!$this->audienceCodeValue) {
+            /**
+             * Onix v2 can define <Audience> composite as well as sole <AudienceCode>
+             * CodeList 28 
+             */
+            $this->audienceCodeValue = $in->textContent;
+        }
 
         // Save memory.
         $this->_forgetSource();
